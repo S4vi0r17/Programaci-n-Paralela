@@ -18,58 +18,58 @@ double suma_riemann_secuencial(double a, double b, int n) {
     return suma_total;
 }
 
-double suma_riemann_paralelo(double a, double b, int n) {
-    double delta_x = (b - a) / n;
-    double suma_total = 0.0;
-    double s1 = 0, s2 = 0, s3 = 0, s4 = 0;
-
-    #pragma omp parallel sections
-    {
-        #pragma omp section
-        {
-            s1 = suma_riemann_secuencial(a, a + n / 4 * delta_x, n / 4);
-        }
-        #pragma omp section
-        {
-            s2 = suma_riemann_secuencial(a + n / 4 * delta_x, a + n / 2 * delta_x, n / 4);
-        }
-        #pragma omp section
-        {
-            s3 = suma_riemann_secuencial(a + n / 2 * delta_x, a + 3 * n / 4 * delta_x, n / 4);
-        }
-        #pragma omp section
-        {
-            s4 = suma_riemann_secuencial(a + 3 * n / 4 * delta_x, b, n / 4);
-        }
-    }
-
-    suma_total = s1 + s2 + s3 + s4;
-    
-    return suma_total;
-}
-
-/* Otra forma de hacerlo */
-
 // double suma_riemann_paralelo(double a, double b, int n) {
 //     double delta_x = (b - a) / n;
 //     double suma_total = 0.0;
+//     double s1 = 0, s2 = 0, s3 = 0, s4 = 0;
 
-//     omp_set_num_threads(4); // 8
-
-//     #pragma omp parallel
+//     #pragma omp parallel sections
 //     {
-//         double suma_local = 0.0;
-//         #pragma omp for
-//         for (int i = 0; i < n; i++) {
-//             double x_i = a + i * delta_x;
-//             suma_local += f(x_i) * delta_x;
+//         #pragma omp section
+//         {
+//             s1 = suma_riemann_secuencial(a, a + n / 4 * delta_x, n / 4);
 //         }
-//         #pragma omp critical
-//         suma_total += suma_local;
+//         #pragma omp section
+//         {
+//             s2 = suma_riemann_secuencial(a + n / 4 * delta_x, a + n / 2 * delta_x, n / 4);
+//         }
+//         #pragma omp section
+//         {
+//             s3 = suma_riemann_secuencial(a + n / 2 * delta_x, a + 3 * n / 4 * delta_x, n / 4);
+//         }
+//         #pragma omp section
+//         {
+//             s4 = suma_riemann_secuencial(a + 3 * n / 4 * delta_x, b, n / 4);
+//         }
 //     }
+
+//     suma_total = s1 + s2 + s3 + s4;
     
 //     return suma_total;
 // }
+
+/* Otra forma de hacerlo */
+
+double suma_riemann_paralelo(double a, double b, int n) {
+    double delta_x = (b - a) / n;
+    double suma_total = 0.0;
+
+    omp_set_num_threads(4); // 8
+
+    #pragma omp parallel
+    {
+        double suma_local = 0.0;
+        #pragma omp for
+        for (int i = 0; i < n; i++) {
+            double x_i = a + i * delta_x;
+            suma_local += f(x_i) * delta_x;
+        }
+        #pragma omp critical
+        suma_total += suma_local;
+    }
+    
+    return suma_total;
+}
 
 int main() {
     double a = 1.0, b = 10.0;
